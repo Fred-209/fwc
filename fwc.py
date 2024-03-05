@@ -91,6 +91,7 @@ def display_manual():
     given filename
     
     Options:
+        -h : Displays help/usage instructions
         -c : Outputs the number of bytes in a given filename
         -l : Outputs the number of lines in a given filename
         -w : Outputs the number of words in a given filename
@@ -108,6 +109,10 @@ def main():
         display_manual()
         return
     elif arg_count == 1:
+        if cmd_args[0] == "-h":
+            display_manual()
+            return
+
         filename = cmd_args[0]
         byte_count, line_count, word_count = count_bytes_lines_words(filename)
         print(
@@ -136,4 +141,3 @@ def main():
 
 
 main()
-1
