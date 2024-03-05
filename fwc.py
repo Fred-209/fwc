@@ -16,8 +16,20 @@ def count_bytes(filename):
 
 def count_lines(filename):
     """Returns the number of lines in a file"""
-    with open(filename) as file:
+    with open(filename, encoding="utf-8") as file:
         return len(file.readlines())
+
+
+def count_words(filename):
+    """Returns the number of words in a file"""
+    with open(filename, encoding="utf-8") as file:
+        return len(file.read().split())
+
+
+def count_chars(filename):
+    """Returns the number of characters in a file"""
+    with open(filename, "rb") as file:
+        return len(file.read().decode())
 
 
 def display_manual():
@@ -57,6 +69,10 @@ def main():
                 print(f"{count_bytes(filename)} {filename}")
             case "-l":
                 print(f"{count_lines(filename)} {filename}")
+            case "-w":
+                print(f"{count_words(filename)} {filename}")
+            case "-m":
+                print(f"{count_chars(filename)} {filename}")
             case _:
                 print("No valid option given")
     except FileNotFoundError:
