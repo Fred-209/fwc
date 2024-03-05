@@ -7,8 +7,10 @@ def count_bytes(byte_data):
     """
     Calculate the number of bytes in the given byte_data.
 
-    :param byte_data: bytes - The input byte data
-    :return: int - The number of bytes in the input data
+    Parameters:
+        byte_data (bytes): The byte data to be counted
+    Returns:
+        int: The number of bytes in the byte data
     """
 
     return len(byte_data)
