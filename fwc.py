@@ -3,75 +3,70 @@
 import sys
 
 
-def count_bytes(filename):
+def count_bytes(byte_data):
     """
-    Returns the number of bytes in a file
+    Calculate the number of bytes in the given byte_data.
+
+    :param byte_data: bytes - The input byte data
+    :return: int - The number of bytes in the input data
+    """
+
+    return len(byte_data)
+
+
+def count_lines(byte_data):
+    """
+    Count the number of lines in the given byte data after decoding it from utf-8.
 
     Parameters:
-        filename (str): The name of the file to read from
+        byte_data (bytes): The byte data to be decoded and counted.
 
     Returns:
-        int: The number of bytes in the file
+        int: The number of lines in the decoded byte data.
     """
-    with open(filename, "rb") as file:
-        file_bytes = file.read()
-        byte_count = len(file_bytes)
-        return byte_count
+
+    return len(byte_data.decode("utf-8").splitlines())
 
 
-def count_lines(filename):
+def count_words(byte_data):
     """
-    Returns the number of lines in a file
+    Count the number of words in the given byte data after decoding it from utf-8.
 
     Parameters:
-        filename (str): The name of the file to read from
+    byte_data (bytes): The byte data to be decoded and counted.
 
     Returns:
-        int: The number of lines in the file
+    int: The number of words in the decoded byte data.
     """
-    with open(filename, encoding="utf-8") as file:
-        return len(file.readlines())
+
+    return len(byte_data.decode("utf-8").split())
 
 
-def count_words(filename):
+def count_chars(byte_data):
     """
-    Returns the number of words in a file
+    Count the number of characters in the given byte data after decoding it from utf-8.
 
     Parameters:
-        filename (str): The name of the file to read from
+    byte_data (bytes): The byte data to be decoded and counted.
 
     Returns:
-        int: The number of words in the file
+    int: The number of characters in the decoded byte data.
     """
-    with open(filename, encoding="utf-8") as file:
-        return len(file.read().split())
+
+    return len(byte_data.decode("utf-8"))
 
 
-def count_chars(filename):
+def count_lines_words_bytes(byte_data):
     """
-    Count the number of characters in the file specified by the filename parameter.
+    Count the number of lines, words, and bytes in the given byte data.
 
     Parameters:
-    filename (str): The path to the file to be counted.
+        byte_data (bytes): The byte data to be counted.
 
     Returns:
-    int: The number of characters in the file.
+        tuple: A 3-tuple containing the line count, word count, and byte count of the input byte data.
     """
-
-    with open(filename, "rb") as file:
-        return len(file.read().decode())
-
-
-def count_bytes_lines_words(filename):
-    """
-    Count the bytes, lines, and words in a file
-
-    Parameters:
-        filename (str): The text name of a file
-    Returns:
-        tuple: (cout of bytes, count of lines, count of words)
-    """
-    return (count_bytes(filename), count_lines(filename), count_words(filename))
+    return (count_lines(byte_data), count_words(byte_data), count_bytes(byte_data))
 
 
 def display_manual():
@@ -105,39 +100,62 @@ def main():
     cmd_args = sys.argv[1:]
     arg_count = len(cmd_args)
 
-    if arg_count == 0:
-        display_manual()
-        return
-    elif arg_count == 1:
-        if cmd_args[0] == "-h":
-            display_manual()
-            return
+    # Check to see if stdin was piped in from another program
+    if not sys.stdin.isatty():
+        file_path = "stdin"
 
-        filename = cmd_args[0]
-        byte_count, line_count, word_count = count_bytes_lines_words(filename)
-        print(
-            f"{line_count} lines, {byte_count} bytes, and {word_count} words in {filename}"
-        )
+        try:
+            byte_data = sys.stdin.buffer.read()
+            option_flag = cmd_args[0]
+        except IndexError:
+            option_flag = None
+
+    # if stdin is not piped in from another source, need to open file
+    # and read it in
     else:
         try:
-            option_flag = cmd_args[0]
-            filename = cmd_args[1]
+            if arg_count == 0:
+                display_manual()
+                return
+            elif arg_count == 1:
+                if cmd_args[0] == "-h":
+                    option_flag = "-h"
+                    file_path = None
+                else:
+                    file_path = cmd_args[0]
+                    option_flag = None
+            elif arg_count == 2:
+                option_flag = cmd_args[0]
+                file_path = cmd_args[1]
+            else:
+                print("Too many arguments given. Read manual with -h option")
+                display_manual()
+                return
 
-            match option_flag:
-                case "-h":
-                    display_manual()
-                case "-c":
-                    print(f"{count_bytes(filename)} {filename}")
-                case "-l":
-                    print(f"{count_lines(filename)} {filename}")
-                case "-w":
-                    print(f"{count_words(filename)} {filename}")
-                case "-m":
-                    print(f"{count_chars(filename)} {filename}")
-                case _:
-                    print("No valid option given")
+            if file_path:
+                with open(file_path, "rb") as file:
+                    byte_data = file.read()
+
         except FileNotFoundError:
-            print("That file doesn't exist")
+            print(f"No file at path {file_path} is found.")
+            return
+    if not option_flag:
+        line_count, word_count, byte_count = count_lines_words_bytes(byte_data)
+        print(line_count, word_count, byte_count, file_path)
+    else:
+        match option_flag:
+            case "-h":
+                display_manual()
+            case "-c":
+                print(f"{count_bytes(byte_data)} {file_path}")
+            case "-l":
+                print(f"{count_lines(byte_data)} {file_path}")
+            case "-w":
+                print(f"{count_words(byte_data)} {file_path}")
+            case "-m":
+                print(f"{count_chars(byte_data)} {file_path}")
+            case _:
+                print("No valid option given")
 
 
 main()

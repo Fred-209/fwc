@@ -1,3 +1,8 @@
 #!/bin/bash
 
-python fwc.py "$@"
+# Checks to see if data is piped into stdin
+if [ -t 0 ]; then
+  python fwc.py "$@"
+else 
+  cat - | python fwc.py "$@"
+fi
